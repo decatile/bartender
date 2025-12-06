@@ -1,9 +1,11 @@
 import asyncio
-import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
+import rich
+
+from reqresolve.interactor.spec import PackageSpec
 from .git import find_newest_change
 from .interactor import for_filepath as interactor_for_filepath
 from .pypi import PypiClient
@@ -19,6 +21,10 @@ async def main() -> None:
                         '--file',
                         default='requirements.txt',
                         help="Relative path (from root) to requirements file (default 'requirements.txt')")
+    parser.add_argument('-d',
+                        '--dry-run',
+                        action='store_true',
+                        help='Output packages into console (it helps when writing to specific format is not supported)')
     args = parser.parse_args(sys.argv[1:])
     fullpath = str(Path(args.root) / args.file)
     before_time = find_newest_change(args.root, args.file)
@@ -27,15 +33,17 @@ async def main() -> None:
     mappings = await PypiClient(before_time).query_packages(pkg.name for pkg in packages if pkg.unconstrained)
 
     if len(mappings) == 0:
+        rich.print('[yellow]Nothing to do')
         return
 
-    os.rename(fullpath, fullpath + '.bak')
-    with open(fullpath, 'w+') as f:
-        for pkg in packages:
-            if pkg.unconstrained:
-                f.write(f'{pkg}<={mappings[pkg.name]}\n')
-            else:
-                f.write(f'{pkg}\n')
+    packages = [
+        PackageSpec(i.name, i.extra, f'<={mappings[i.name]}') if i.unconstrained else i
+        for i in packages
+    ]
+    if not args.dry_run:
+        interactor.save_specs(packages)
+    else:
+        rich.print(f'[blue]{interactor.dump_specs(packages)}')
 
 
 if __name__ == '__main__':

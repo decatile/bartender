@@ -1,2 +1,1 @@
 from .interactor import RequirementsInteractor
-from .exception import InvalidSpecifierException, MalformedSpecifiersException

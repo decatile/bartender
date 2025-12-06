@@ -9,3 +9,6 @@ class AbstractInteractor(ABC):
 
     @abstractmethod
     def save_specs(self, specs: list[PackageSpec]): ...
+
+    @abstractmethod
+    def dump_specs(self, specs: list[PackageSpec]) -> str: ...
