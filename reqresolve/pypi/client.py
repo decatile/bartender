@@ -45,6 +45,6 @@ class PypiClient:
 
         raise NoSuitableVersionException(package_name)
 
-    async def queue_packages(self, packages: Iterable[str]) -> dict[str, str]:
+    async def query_packages(self, packages: Iterable[str]) -> dict[str, str]:
         await asyncio.gather(*(self._task(package) for package in packages))
         return self._mapping
