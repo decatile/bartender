@@ -11,7 +11,7 @@ from reqresolve.interactor import for_filepath as interactor_for_filepath
 from reqresolve.pypi import PypiClient
 
 
-async def main() -> None:
+async def _main() -> None:
     parser = ArgumentParser()
     parser.add_argument('-r',
                         '--root',
@@ -53,5 +53,8 @@ async def main() -> None:
         rich.print(f'[blue]{interactor.dump_specs(packages)}')
 
 
+def main():
+    asyncio.run(_main())
+
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
