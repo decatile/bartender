@@ -1,6 +1,7 @@
 import os
 
 from reqresolve.interactor.interface import AbstractInteractor
+from reqresolve.interactor.requirements.exception import InvalidSpecifierException, MalformedSpecifiersException
 from reqresolve.package_spec import PackageSpec
 
 
@@ -10,17 +11,17 @@ class RequirementsInteractor(AbstractInteractor):
 
     def load_specs(self) -> list[PackageSpec]:
         result: list[PackageSpec] = []
-        errors: list[Exception] = []
+        errors: list[InvalidSpecifierException] = []
 
         with open(self._filepath) as f:
             for lineno, line in enumerate(f, 1):
                 try:
                     result.append(PackageSpec.parse(line))
                 except ValueError:
-                    errors.append(Exception(f"Invalid specifier at line {lineno}: '{line.strip()}'"))
+                    errors.append(InvalidSpecifierException(lineno, line.strip()))
 
         if errors:
-            raise ExceptionGroup(f'Malformed specifiers in {self._filepath}', errors)
+            raise MalformedSpecifiersException(self._filepath, errors)
 
         return result
 
