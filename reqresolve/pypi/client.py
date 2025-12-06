@@ -16,7 +16,11 @@ class _ParseResponseEntry:
 
 
 class PypiClient:
-    def __init__(self, before_time: datetime, on_done: Callable[[], None]) -> None:
+    def __init__(
+            self,
+            before_time: datetime,
+            on_done: Callable[[], None] = lambda: ()
+    ) -> None:
         self._before_time = before_time
         self._inner = AsyncClient()
         self._mapping = {}
