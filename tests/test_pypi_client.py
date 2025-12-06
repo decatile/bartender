@@ -1,0 +1,25 @@
+from datetime import datetime, UTC
+
+import pytest
+from reqresolve.pypi.client import PypiClient
+
+
+@pytest.mark.asyncio
+async def test_existing_package():
+    client = PypiClient(datetime.now(UTC))
+    resp = await client.queue_packages(['numpy'])
+    assert len(resp) == 1
+
+
+@pytest.mark.asyncio
+async def test_non_existing_package():
+    with pytest.raises(Exception):
+        client = PypiClient(datetime.now(UTC))
+        await client.queue_packages(['-1'])
+
+
+@pytest.mark.asyncio
+async def test_no_matching_versions():
+    with pytest.raises(Exception):
+        client = PypiClient(datetime(1900, 1, 1).astimezone(UTC))
+        await client.queue_packages(['numpy'])
