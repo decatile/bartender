@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Awaitable, Generator, Iterable
 
+import rich
 from httpx import AsyncClient, Response
 
 from reqresolve.pypi.exception import PackageNotFoundException, NoSuitableVersionException
@@ -31,6 +32,7 @@ class PypiClient:
             yield _ParseResponseEntry(version, datetime.fromisoformat(upload_time))
 
     async def _task(self, package_name: str) -> None:
+        rich.print(f'[green]Requesting pypi to retrieve metadata for package {package_name}')
         resp = await self._inner.get(f'https://pypi.org/pypi/{package_name}/json')
 
         if resp.status_code == 404:
@@ -41,6 +43,7 @@ class PypiClient:
         for entry in self._parse_response(resp):
             if entry.time < self._before_time:
                 self._mapping[package_name] = entry.version
+                rich.print(f'[yellow]Found suitable version {entry.version} for package {package_name}')
                 return
 
         raise NoSuitableVersionException(package_name)
