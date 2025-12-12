@@ -9,7 +9,14 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
+        include:
+          - os: ubuntu-latest
+            artifact_name: reqresolve-linux
+            asset_name: reqresolve-linux
+          - os: windows-latest
+            artifact_name: reqresolve-windows
+            asset_name: reqresolve-windows.exe
 
     runs-on: ${{ matrix.os }}
 
@@ -26,16 +33,45 @@ jobs:
         run: uv sync
 
       - name: Build Executable
-        uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: reqresolve
-          mode: onefile
+        run: uv run nuitka reqresolve --mode=onefile --output-dir=build --output-filename=${{ matrix.asset_name }} --assume-yes-for-downloads --include-module=cffi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }} Build
-          path: |
-            build/*.exe
-            build/*.bin
+          name: ${{ matrix.artifact_name }}
+          path: build/${{ matrix.asset_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from pyproject.toml
+        shell: bash
+        run: |
+          VERSION=$(grep '^version =' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            reqresolve-linux/reqresolve-linux
+            reqresolve-windows/reqresolve-windows.exe
+            reqresolve-macos/reqresolve-macos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
