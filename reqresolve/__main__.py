@@ -19,6 +19,7 @@ async def _main() -> None:
 
     match args.command:
         case 'query':
+            L.info(f'Using resolved time {args.time}')
             with Progress(transient=True) as p:
                 task = p.add_task('Working...', total=len(args.packages))
                 mappings = await PypiClient(

@@ -5,11 +5,12 @@ from datetime import datetime, UTC
 
 # noinspection PyBroadException
 def datetime_like(value: str) -> datetime:
+    tz = datetime.now(UTC).astimezone().tzinfo
     try:
         num = int(value)
-        return datetime.fromtimestamp(num, UTC)
+        return datetime.fromtimestamp(num, tz)
     except Exception:
-        return datetime.fromisoformat(value).astimezone(UTC)
+        return datetime.fromisoformat(value).astimezone(tz)
 
 
 def parse() -> Namespace:
