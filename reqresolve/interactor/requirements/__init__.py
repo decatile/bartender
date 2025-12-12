@@ -44,12 +44,14 @@ class RequirementsInteractor(AbstractInteractor):
             writer.write('\n')
 
     def save_specs(self, specs: list[PackageSpec]) -> None:
-        L.info(f'Rename {self._filepath} -> *.bak')
+        L.debug(f'Rename {self._filepath} -> *.bak')
         os.rename(self._filepath, self._filepath + '.bak')
 
         L.debug(f'Write to new file at {self._filepath}')
         with open(self._filepath, 'w+') as f:
             self._save_specs_to(specs, f)
+
+        L.info(f'Wrote to {self._filepath}, saved old as .bak')
 
     def dump_specs(self, specs: list[PackageSpec]) -> str:
         io = StringIO()
