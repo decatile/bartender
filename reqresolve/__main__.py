@@ -3,16 +3,19 @@ import os.path
 from typing import cast
 
 import rich
+import rich.logging
 from rich.progress import Progress
 
 from reqresolve import cli
 from reqresolve.git import find_newest_change
 from reqresolve.interactor import for_filepath as interactor_for_filepath
+from reqresolve.log import L, setup_logging
 from reqresolve.pypi import PypiClient
 
 
 async def _main() -> None:
     args = cli.parse()
+    setup_logging(args.verbose)
 
     match args.command:
         case 'query':
@@ -34,7 +37,7 @@ async def _main() -> None:
             unconstrained_packages = [pkg.name for pkg in packages if pkg.unconstrained]
 
             if len(unconstrained_packages) == 0:
-                rich.print('[yellow]Nothing to do')
+                L.info('Nothing to do')
                 return
 
             with Progress(transient=True) as p:

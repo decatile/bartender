@@ -1,11 +1,16 @@
+import os.path
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 from typing import cast
 
-import rich
 from pygit2 import Repository, Commit
+
+from reqresolve.log import L
 
 
 def find_newest_change(repository_root: str, relative_filepath: str) -> datetime:
+    L.debug(f'Opening git repository at {str(os.path.abspath(repository_root))}')
+
     repo = Repository(repository_root)
 
     time_unix = 0
@@ -21,5 +26,5 @@ def find_newest_change(repository_root: str, relative_filepath: str) -> datetime
         time_unix,
         timezone(timedelta(minutes=time_offset))
     )
-    rich.print(f'[yellow]Found newest change at {dt}.')
+    L.info(f'Found newest change at {dt}.')
     return dt

@@ -1,22 +1,25 @@
 from argparse import ArgumentParser, Namespace
 from datetime import datetime, UTC
 
-import rich
 
 
 # noinspection PyBroadException
 def datetime_like(value: str) -> datetime:
     try:
         num = int(value)
-        dt = datetime.fromtimestamp(num, UTC)
-        rich.print(f'[yellow]Parsed datetime: {dt}')
-        return dt
-    except:
+        return datetime.fromtimestamp(num, UTC)
+    except Exception:
         return datetime.fromisoformat(value).astimezone(UTC)
 
 
 def parse() -> Namespace:
     parser = ArgumentParser()
+    parser.add_argument('-v',
+                        '--verbose',
+                        action='count',
+                        default=0,
+                        help='-v : INFO, -vv : DEBUG messages')
+
     subparsers = parser.add_subparsers(dest='command')
 
     query_parser = subparsers.add_parser('query', help='Query packages without reading any file')

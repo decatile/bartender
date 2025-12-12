@@ -30,9 +30,11 @@ class PackageSpec:
         return self.version is None
 
     @staticmethod
-    def parse(value: str) -> 'PackageSpec':
-        value = value.strip().replace(' ', '')
+    def normalize(value: str) -> str:
+        return value.strip().replace(' ', '')
 
+    @staticmethod
+    def parse(value: str) -> 'PackageSpec':
         result = RE.fullmatch(value)
         if result is None:
             raise ValueError

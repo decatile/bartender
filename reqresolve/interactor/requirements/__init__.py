@@ -5,11 +5,18 @@ from typing import TextIO
 from reqresolve.interactor.abc import AbstractInteractor
 from reqresolve.interactor.exception import InvalidSpecifierException, MalformedSpecifiersException
 from reqresolve.interactor.spec import PackageSpec
+from reqresolve.log import L
 
 
 class RequirementsInteractor(AbstractInteractor):
     def __init__(self, filepath: str):
         self._filepath = filepath
+
+    def _open_dependencies(self) -> list[str]:
+        L.debug('Load dependencies from file')
+        L.debug(f'Open file at {self._filepath}')
+        with open(self._filepath, 'r') as f:
+            return f.readlines()
 
     def load_specs(self) -> list[PackageSpec]:
         result: list[PackageSpec] = []
@@ -17,13 +24,17 @@ class RequirementsInteractor(AbstractInteractor):
 
         with open(self._filepath) as f:
             for lineno, line in enumerate(f, 1):
+                dep = PackageSpec.normalize(line)
                 try:
-                    result.append(PackageSpec.parse(line))
+                    result.append(PackageSpec.parse(dep))
+                    L.debug(f'Detected dependency {dep}')
                 except ValueError:
-                    errors.append(InvalidSpecifierException(line.strip(), lineno))
+                    errors.append(InvalidSpecifierException(line, lineno))
 
         if errors:
             raise MalformedSpecifiersException(self._filepath, errors)
+
+        L.info(f'Loaded {len(result)} dependencies from file')
 
         return result
 
@@ -33,8 +44,10 @@ class RequirementsInteractor(AbstractInteractor):
             writer.write('\n')
 
     def save_specs(self, specs: list[PackageSpec]) -> None:
+        L.info(f'Rename {self._filepath} -> *.bak')
         os.rename(self._filepath, self._filepath + '.bak')
 
+        L.debug(f'Write to new file at {self._filepath}')
         with open(self._filepath, 'w+') as f:
             self._save_specs_to(specs, f)
 

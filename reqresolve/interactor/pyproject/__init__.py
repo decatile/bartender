@@ -1,6 +1,6 @@
 import tomllib
 from io import StringIO
-from typing import NoReturn
+from typing import Never
 
 from reqresolve.interactor.abc import AbstractInteractor
 from reqresolve.interactor.exception import (
@@ -8,32 +8,44 @@ from reqresolve.interactor.exception import (
     MalformedSpecifiersException,
     UnsupportedOperationException
 )
+from reqresolve.interactor.pyproject.model import FileModel
 from reqresolve.interactor.spec import PackageSpec
+from reqresolve.log import L
 
 
 class PyprojectInteractor(AbstractInteractor):
     def __init__(self, filepath: str):
         self._filepath = filepath
 
+    def _open_dependencies(self) -> list[str]:
+        L.debug('Load dependencies from file')
+        L.debug(f'Open file at {self._filepath}')
+        with open(self._filepath, 'rb') as f:
+            L.debug('Parse in TOML format')
+            obj = tomllib.load(f)
+            L.debug('Verify file structure and get dependencies')
+            return FileModel(**obj).project.dependencies
+
     def load_specs(self) -> list[PackageSpec]:
         result: list[PackageSpec] = []
         errors: list[InvalidSpecifierException] = []
 
-        with open(self._filepath, 'rb') as f:
-            obj = tomllib.load(f)
-            deps: list[str] = obj['project']['dependencies']
-            for dep in deps:
-                try:
-                    result.append(PackageSpec.parse(dep))
-                except ValueError:
-                    errors.append(InvalidSpecifierException(dep.strip()))
+        for dep in self._open_dependencies():
+            dep = PackageSpec.normalize(dep)
+            try:
+                result.append(PackageSpec.parse(dep))
+                L.debug(f'Detected dependency {dep}')
+            except ValueError:
+                errors.append(InvalidSpecifierException(dep))
 
         if errors:
             raise MalformedSpecifiersException(self._filepath, errors)
 
+        L.info(f'Loaded {len(result)} dependencies from file')
+
         return result
 
-    def save_specs(self, specs: list[PackageSpec]) -> 'NoReturn':
+    def save_specs(self, specs: list[PackageSpec]) -> Never:
         raise UnsupportedOperationException(
             'Saving to pyproject.toml is not supported, use --dry-run to get dependencies content'
         )
