@@ -1,6 +1,5 @@
 import os.path
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 from typing import cast
 
 from pygit2 import Repository, Commit

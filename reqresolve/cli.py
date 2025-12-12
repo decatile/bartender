@@ -1,16 +1,20 @@
 from argparse import ArgumentParser, Namespace
 from datetime import datetime, UTC
+from typing import Callable
 
 
+def datetime_like(is_local: bool) -> Callable[[str], datetime]:
+    # noinspection PyBroadException
+    def inner(value: str) -> datetime:
+        try:
+            num = int(value)
+            return datetime.fromtimestamp(num, tz)
+        except Exception:
+            return datetime.fromisoformat(value).replace(tzinfo=tz)
 
-# noinspection PyBroadException
-def datetime_like(value: str) -> datetime:
-    tz = datetime.now(UTC).astimezone().tzinfo
-    try:
-        num = int(value)
-        return datetime.fromtimestamp(num, tz)
-    except Exception:
-        return datetime.fromisoformat(value).astimezone(tz)
+    tz = datetime.now(UTC).astimezone().tzinfo if is_local else UTC
+    inner.__name__ = 'datetime-like'
+    return inner
 
 
 def parse() -> Namespace:
@@ -27,11 +31,17 @@ def parse() -> Namespace:
     query_parser.add_argument('packages',
                               nargs='+',
                               help='Package names to query')
-    query_parser.add_argument('-t',
-                              '--time',
-                              type=datetime_like,
-                              help='Time before which we query package versions (ISO | Unix)',
-                              required=True)
+    query_parser_group = query_parser.add_mutually_exclusive_group(required=True)
+    query_parser_group.add_argument('-l',
+                                    '--local-time',
+                                    dest='time',
+                                    type=datetime_like(True),
+                                    help='Local time before which we query package versions (ISO | unix)')
+    query_parser_group.add_argument('-u',
+                                    '--utc-time',
+                                    dest='time',
+                                    type=datetime_like(False),
+                                    help='UTC time before which we query package versions (ISO | unix)')
 
     file_parser = subparsers.add_parser('file', help='Query packages from selected file and write results into it')
     file_parser.add_argument('-r',
