@@ -11,12 +11,9 @@ def setup_logging(verbosity: int) -> None:
             level = logging.WARN
         case 1:
             level = logging.INFO
-        case 2:
-            level = logging.DEBUG
         case _:
-            raise ValueError
+            level = logging.DEBUG
 
-    global L
     L.setLevel(level)
 
 

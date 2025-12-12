@@ -16,7 +16,10 @@ def find_newest_change(repository_root: str, relative_filepath: str) -> datetime
     time_offset = 0
     for blame_hunk in repo.blame(relative_filepath):
         commit = cast(Commit | None, repo.get(blame_hunk.orig_commit_id))
-        assert commit is not None
+        if commit is None:
+            raise ValueError(f'Commit with ID {blame_hunk.orig_commit_id} is referenced by blame hunk, '
+                             f'but an attempt to get its object from repo failed!')
+
         if commit.commit_time > time_unix:
             time_unix = commit.commit_time
             time_offset = commit.commit_time_offset
