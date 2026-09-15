@@ -32,6 +32,9 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
+      - name: Test the project
+        run: uv run pytest
+
       - name: Build Executable
         run: uv run nuitka bartender --mode=onefile --output-dir=build --output-filename=${{ matrix.asset_name }} --assume-yes-for-downloads --include-module=cffi
 
