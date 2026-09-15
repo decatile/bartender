@@ -1,4 +1,4 @@
 from .client import PypiClient
-from .exception import PackageNotFoundException, NoSuitableVersionException
+from .exception import NoSuitableVersionException, PackageNotFoundException
 
-__all__ = ('PypiClient', 'PackageNotFoundException', 'NoSuitableVersionException')
+__all__ = ("NoSuitableVersionException", "PackageNotFoundException", "PypiClient")

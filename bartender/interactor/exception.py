@@ -12,7 +12,7 @@ class InvalidSpecifierException(InteractorException):
 
 class MalformedSpecifiersException(ExceptionGroup, InteractorException):
     def __init__(self, filepath: str, errors: list[InvalidSpecifierException]):
-        super().__init__(f'Malformed specifiers in file {filepath}', errors)
+        super().__init__(f"Malformed specifiers in file {filepath}", errors)
 
 
 class UnsupportedOperationException(InteractorException): ...

@@ -2,6 +2,10 @@
 
 A lightweight CLI tool for pinning package versions based on historical requirements in Git repositories.
 
+## Showcase 
+
+![til](./misc/showcase.gif)
+
 ## What It Does
 
 bartender analyzes the history of your requirements.txt or pyproject.toml file and generates a new version with each
