@@ -65,4 +65,4 @@ PyPI is the main repository that most users rely on. Given Bartender’s goal of
 Although, in most cases, there will still be two formats: pyproject.toml and requirements.txt, there are two reasons for this:
 
 1) Their creation is handled by a function that returns an interface; otherwise, we would have to give up on typing.
-2) It’s possible to introduce a third format for internal use. Bartender won’t get in the way of such changes.
+2) It’s possible to introduce a third format for internal use. Bartender won’t get in the way of such changes. See this [PR](https://github.com/decatile/bartender/pull/1) for reference.
