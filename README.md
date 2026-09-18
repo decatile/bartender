@@ -37,19 +37,22 @@ bartender query <packages> -t <time>
 Arguments:
 
 - packages - One or more package names to query (required)
-- -t, --time - Time before which to query package versions (required)
+
+- -l, --local-time - Time before which to query package versions (local, required)
+OR
+- -u, --utc-time - Time before which to query package versions (UTC, required)
 
 Examples:
 
 ```bash
 # Using Unix timestamp
-bartender query numpy pandas -t 1640995200
+bartender query numpy pandas -u 1640995200
 
 # Using ISO format date
-bartender query requests flask -t "2023-01-01T00:00:00"
+bartender query requests flask -u "2023-01-01T00:00:00"
 
 # Querying multiple packages
-bartender query django numpy tensorflow -t "2022-06-15"
+bartender query django numpy tensorflow -l "2022-06-15"
 ```
 
 ### File Mode - Work with Dependency Files
